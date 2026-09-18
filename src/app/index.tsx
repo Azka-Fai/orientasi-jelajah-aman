@@ -1,6 +1,7 @@
 // app/index.tsx
 import { useEffect, useState } from "react";
 import { View } from "react-native";
+
 // Catatan: gunakan ../components/ jika file berada di dalam folder app/
 // yang sejajar dengan folder components/
 import RiwayatList from "../../components/RiwayatList";
