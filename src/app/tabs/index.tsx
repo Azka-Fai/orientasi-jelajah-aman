@@ -4,9 +4,9 @@ import { View } from "react-native";
 
 // Catatan: gunakan ../components/ jika file berada di dalam folder app/
 // yang sejajar dengan folder components/
-import RiwayatList from "../../components/RiwayatList";
-import SearchBox from "../../components/SearchBox";
-import WeatherCard from "../../components/WeatherCard";
+import RiwayatList from "../../../components/RiwayatList";
+import SearchBox from "../../../components/SearchBox";
+import WeatherCard from "../../../components/WeatherCard";
 export default function HalamanUtama() {
   const [kotaAktif, setKotaAktif] = useState("Pekalongan");
   const [riwayat, setRiwayat] = useState<string[]>(["Pekalongan"]);
