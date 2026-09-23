@@ -1,5 +1,5 @@
 import React from "react";
-import { LaporanUdara } from "../types/cuaca";
+import { LaporanUdara } from "../../types/cuaca";
 
 interface Props {
   laporan: LaporanUdara;
