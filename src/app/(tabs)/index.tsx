@@ -7,12 +7,16 @@ import SearchBox from "../../components/SearchBox";
 import WeatherCard from "../../components/WeatherCard";
 import { useDebounce } from "../../hooks/use-debounce";
 import { cariKota } from "../../services/geocodingService";
+
 export default function HalamanUtama() {
   const [teksCari, setTeksCari] = useState("");
   const [hasil, setHasil] = useState<HasilGeocoding[]>([]);
   const [sedangMemuat, setSedangMemuat] = useState(false);
   const [pesanError, setPesanError] = useState<string | null>(null);
-  const teksTertunda = useDebounce(teksCari, 500);
+
+  // 1. Ubah delay debounce menjadi 800 (dari sebelumnya 500)
+  const teksTertunda = useDebounce(teksCari, 800);
+
   useEffect(() => {
     if (teksTertunda.trim().length === 0) {
       setHasil([]);
@@ -21,6 +25,7 @@ export default function HalamanUtama() {
     }
     ambilData(teksTertunda);
   }, [teksTertunda]);
+
   async function ambilData(nama: string) {
     setSedangMemuat(true);
     setPesanError(null);
@@ -33,20 +38,34 @@ export default function HalamanUtama() {
       setSedangMemuat(false);
     }
   }
+
   return (
     <SafeAreaView style={{ flex: 1, padding: 16, gap: 16 }}>
       <SearchBox onCari={setTeksCari} />
+
       {sedangMemuat && <ActivityIndicator />}
+
       {pesanError && (
         <View>
-          <Text>{pesanError}</Text>
+          {/* 2. Tambahkan accessibilityLabel pada pesan error */}
+          <Text accessibilityLabel="Pesan error koneksi">{pesanError}</Text>
           <Button title="Coba Lagi" onPress={() => ambilData(teksTertunda)} />
         </View>
       )}
+
       {!sedangMemuat &&
         !pesanError &&
         teksTertunda.length > 0 &&
-        hasil.length === 0 && <Text>Kota tidak ditemukan</Text>}
+        hasil.length === 0 && (
+          /* 2. Tambahkan accessibilityLabel pada pesan kosong */
+          <Text accessibilityLabel="Informasi: Kota tidak ditemukan">
+            Kota tidak ditemukan
+          </Text>
+        )}
+
+      {/* 3. Tambahkan indikator jumlah hasil (hanya tampil jika ada hasil) */}
+      {hasil.length > 0 && <Text>Ditemukan {hasil.length} kota</Text>}
+
       {hasil.map((kota) => (
         <WeatherCard
           key={kota.id}
