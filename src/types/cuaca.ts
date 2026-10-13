@@ -10,6 +10,7 @@ export interface WeatherCardProps {
   kota: string;
   suhu: number;
   tingkatAQI: TingkatAQI;
+  indeksAQI?: number;
 }
 
 export interface LaporanUdara {

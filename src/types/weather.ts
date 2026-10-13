@@ -1,3 +1,5 @@
+import { TingkatAQI } from "./cuaca";
+
 // src/types/weather.ts
 export interface CuacaSaatIni {
   suhu: number;
@@ -19,4 +21,11 @@ export interface DataKualitasUdara {
   indeksAQI: number;
   pm25: number;
   pm10: number;
+}
+
+export interface WeatherCardProps {
+  kota: string;
+  suhu: number;
+  tingkatAQI: TingkatAQI;
+  indeksAQI?: number; // baru: angka asli dari API, opsional
 }
