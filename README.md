@@ -1,3 +1,32 @@
+# Jelajah Aman 🌤️
+
+Aplikasi cuaca dan kualitas udara berbasis React Native (Expo) dengan fitur **offline-first** menggunakan SQLite sebagai cache lokal.
+
+## Tentang Proyek
+
+Jelajah Aman memungkinkan pengguna mencari cuaca dan kualitas udara berdasarkan kota, menyimpan data lokal di perangkat, serta tetap dapat membuka data terakhir meskipun tanpa koneksi internet.
+
+## Penjelasan Status Data (Pertemuan 7)
+
+Aplikasi menampilkan label status yang jujur kepada pengguna berdasarkan asal data yang ditampilkan:
+
+- **`cache-segar`** — Data diambil dari cache lokal (SQLite) yang masih segar (umur < 30 menit). Jaringan *tidak* dipanggil. Label tampil dengan latar hijau: *"Data tersimpan (masih segar)"*. Ini menghemat kuota dan mempercepat tampilan.
+
+- **`cache-basi`** — Cache ada, tetapi aplikasi gagal memperbarui dari internet (offline). Data lama tetap ditampilkan agar pengguna tidak melihat layar kosong, namun label oranye *"Mode offline - data tersimpan mungkin sudah usang"* memberi tahu bahwa angkanya bisa berbeda dari kondisi nyata. Label ini penting karena data cuaca berubah setiap jam — pengguna berhak tahu jika informasi sudah tidak segar.
+
+- **First-run offline** — Tidak ada cache sama sekali dan tidak ada koneksi. Kondisi ini terjadi saat pertama kali membuka kota tanpa pernah ada data tersimpan. Aplikasi menampilkan pesan error dan tombol *Coba Lagi* agar pengguna tahu bahwa mereka perlu koneksi internet minimal sekali sebelum data bisa diakses offline. Tanpa label status yang jujur, pengguna mungkin bingung apakah aplikasinya rusak atau kotanya tidak ditemukan.
+
+## Arsitektur Offline-First
+
+```
+Layar → cuacaRepository.ts → cacheRepository.ts → SQLite (src/db/database.ts)
+                          ↘ weatherService.ts + airQualityService.ts → Open-Meteo API
+```
+
+Data dari jaringan selalu menimpa cache lama (INSERT OR REPLACE). Cache hanya dipakai saat jaringan tidak tersedia atau data masih segar (TTL 30 menit). Cache otomatis dihapus setelah 7 hari.
+
+---
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
