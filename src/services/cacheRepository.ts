@@ -68,18 +68,36 @@ export async function ambilCache(
 
 export async function daftarKotaTersimpan(): Promise<RingkasanKotaTersimpan[]> {
   const db = await ambilDatabase();
-  const semua = await db.getAllAsync<BarisRingkasan>(
-    `SELECT kunci, kota_id, nama_kota, latitude, longitude, disimpan_pada
-     FROM cache_cuaca ORDER BY disimpan_pada DESC LIMIT 5`
+  const semua = await db.getAllAsync<BarisCache>(
+    `SELECT kunci, kota_id, nama_kota, latitude, longitude, cuaca_json, aqi_json, disimpan_pada
+     FROM cache_cuaca ORDER BY disimpan_pada DESC`
   );
-  return semua.map((b) => ({
-    kunci: b.kunci,
-    id: b.kota_id,
-    nama: b.nama_kota,
-    latitude: b.latitude,
-    longitude: b.longitude,
-    disimpanPada: b.disimpan_pada,
-  }));
+  return semua.map((b) => {
+    let suhu: number | undefined;
+    let kodeCuaca: number | undefined;
+    try {
+      const parsedCuaca = JSON.parse(b.cuaca_json) as DataCuacaLengkap;
+      suhu = parsedCuaca?.saatIni?.suhu;
+      kodeCuaca = parsedCuaca?.saatIni?.kodeCuaca;
+    } catch {}
+
+    return {
+      kunci: b.kunci,
+      id: b.kota_id,
+      nama: b.nama_kota,
+      latitude: b.latitude,
+      longitude: b.longitude,
+      disimpanPada: b.disimpan_pada,
+      suhu,
+      kodeCuaca,
+    };
+  });
+}
+
+// Invalidation per item: hapus data cache satu kota tertentu dari SQLite
+export async function hapusCacheKota(kunci: string): Promise<void> {
+  const db = await ambilDatabase();
+  await db.runAsync("DELETE FROM cache_cuaca WHERE kunci = ?", [kunci]);
 }
 
 // Invalidation otomatis: buang cache yang lebih tua dari batas umur
@@ -95,3 +113,4 @@ export async function hapusSemuaCache(): Promise<void> {
   const db = await ambilDatabase();
   await db.runAsync("DELETE FROM cache_cuaca");
 }
+

@@ -1,31 +1,184 @@
 # Jelajah Aman 🌤️
 
-Aplikasi cuaca dan kualitas udara berbasis React Native (Expo) dengan fitur **offline-first** menggunakan SQLite sebagai cache lokal.
+Aplikasi pemantau cuaca dan kualitas udara (*Air Quality Index* - AQI) berbasis **React Native** dan **Expo Router** dengan pendekatan **Offline-First**. Aplikasi ini mengintegrasikan **SQLite** dan **AsyncStorage** untuk menjamin data cuaca lokal tetap dapat diakses kapan saja meski tanpa koneksi internet.
 
-## Tentang Proyek
-
-Jelajah Aman memungkinkan pengguna mencari cuaca dan kualitas udara berdasarkan kota, menyimpan data lokal di perangkat, serta tetap dapat membuka data terakhir meskipun tanpa koneksi internet.
-
-## Penjelasan Status Data (Pertemuan 7)
-
-Aplikasi menampilkan label status yang jujur kepada pengguna berdasarkan asal data yang ditampilkan:
-
-- **`cache-segar`** — Data diambil dari cache lokal (SQLite) yang masih segar (umur < 30 menit). Jaringan *tidak* dipanggil. Label tampil dengan latar hijau: *"Data tersimpan (masih segar)"*. Ini menghemat kuota dan mempercepat tampilan.
-
-- **`cache-basi`** — Cache ada, tetapi aplikasi gagal memperbarui dari internet (offline). Data lama tetap ditampilkan agar pengguna tidak melihat layar kosong, namun label oranye *"Mode offline - data tersimpan mungkin sudah usang"* memberi tahu bahwa angkanya bisa berbeda dari kondisi nyata. Label ini penting karena data cuaca berubah setiap jam — pengguna berhak tahu jika informasi sudah tidak segar.
-
-- **First-run offline** — Tidak ada cache sama sekali dan tidak ada koneksi. Kondisi ini terjadi saat pertama kali membuka kota tanpa pernah ada data tersimpan. Aplikasi menampilkan pesan error dan tombol *Coba Lagi* agar pengguna tahu bahwa mereka perlu koneksi internet minimal sekali sebelum data bisa diakses offline. Tanpa label status yang jujur, pengguna mungkin bingung apakah aplikasinya rusak atau kotanya tidak ditemukan.
-
-## Arsitektur Offline-First
-
-```
-Layar → cuacaRepository.ts → cacheRepository.ts → SQLite (src/db/database.ts)
-                          ↘ weatherService.ts + airQualityService.ts → Open-Meteo API
-```
-
-Data dari jaringan selalu menimpa cache lama (INSERT OR REPLACE). Cache hanya dipakai saat jaringan tidak tersedia atau data masih segar (TTL 30 menit). Cache otomatis dihapus setelah 7 hari.
+Proyek ini dikembangkan dan disempurnakan sebagai bagian dari **Ujian Tengah Semester (UTS) - Pemrograman Berbasis Platform (4 SKS)**, Program Studi S1 Informatika, UIN K.H. Abdurrahman Wahid Pekalongan.
 
 ---
+
+## 🌟 Fitur Utama & Penyempurnaan UTS
+
+Aplikasi Jelajah Aman telah mengimplementasikan seluruh **4 fitur tugas penyempurnaan UTS** sesuai modul:
+
+### 1. 🧭 Kustomisasi Ikon Tab Bar & Navigasi (Tugas 1)
+- Mengganti seluruh ikon tab navigasi default menjadi ikon representatif dari pustaka `@expo/vector-icons/Ionicons`.
+  - **Beranda**: `partly-sunny` / `partly-sunny-outline`
+  - **Riwayat & Favorit**: `time` / `time-outline`
+  - **Pengaturan**: `settings` / `settings-outline`
+  - **Tentang**: `information-circle` / `information-circle-outline`
+- Merapikan label navigasi tab bar dan judul header agar alur penggunaan lebih intuitif.
+- Tab bar terintegrasi dinamis dengan tema aktif (*Light* / *Dark mode*).
+
+### 2. 🕒 Riwayat Pencarian Terakhir (*Recent Search History* - Tugas 2)
+- Mekanisme penyimpanan lokal 10 kota pencarian terakhir menggunakan `AsyncStorage` (`@jelajah_aman:riwayat_pencarian`).
+- **Deduplikasi Otomatis**: Jika kota yang sama dicari ulang, entri otomatis dipindahkan ke urutan teratas tanpa duplikasi.
+- **Navigasi Otomatis**: Mengetuk salah satu item riwayat pencarian akan langsung membuka halaman **Beranda**, mengisi kotak pencarian, dan secara otomatis memunculkan data cuaca kota tersebut.
+- Opsi untuk menghapus satu item riwayat tertentu maupun mengosongkan seluruh riwayat sekaligus dengan konfirmasi dialog.
+
+### 3. 💾 Pengelolaan & Penghapusan Cache Kota (*Offline-First SQLite* - Tugas 3)
+- Menampilkan daftar kota tersimpan di SQLite beserta informasi **suhu terkini** dan **kondisi cuaca** saat offline.
+- **Penghapusan Cache per Item**: Terdapat tombol *Hapus Cache* pada setiap item kota di tab riwayat/tersimpan.
+- **Konfirmasi Keamanan (Alert)**: Menampilkan dialog konfirmasi (*Alert*) sebelum data cache dihapus dari memori perangkat.
+- **Pembersihan Massal**: Menu pengaturan menyediakan opsi untuk menghapus seluruh cache cuaca sekaligus.
+
+### 4. 🌓 Sistem Tema Dinamis (*Light, Dark & System Default* - Tugas 4)
+- Pilihan mode tampilan di menu **Pengaturan**:
+  - ☀️ **Terang (Light Mode)**
+  - 🌙 **Gelap (Dark Mode)**
+  - ⚙️ **Ikuti Sistem (System Default)**
+- Preferensi tema disimpan secara persisten di penyimpanan lokal perangkat (`@jelajah_aman:tema_mode`).
+- Perubahan warna diterapkan secara dinamis dan konsisten ke seluruh layar:
+  - Layar Beranda (*Home*)
+  - Layar Riwayat & Favorit (*History*)
+  - Layar Pengaturan (*Settings*)
+  - Layar Tentang Aplikasi (*About*)
+  - Komponen kartu cuaca, kotak pencarian, indikator AQI, modal, dan status bar.
+
+### 5. 🌐 Kompatibilitas Universal (Mobile & Web)
+- **Komponen Universal**: Semua komponen dibuat menggunakan komponen standar React Native (`View`, `Text`, dll.) sehingga bebas error di Android (Expo Go) dan Browser Web.
+- **Web SQLite Support**: Dilengkapi konfigurasi `metro.config.js` untuk mendukung binary WebAssembly (`.wasm`) dan header COOP/COEP pada platform Web.
+
+---
+
+## 🏗️ Arsitektur & Alur Offline-First
+
+Aplikasi Jelajah Aman menerapkan strategi *Cache-Aside* dengan alur:
+
+```
+Layar UI (Beranda / Riwayat)
+       │
+       ▼
+cuacaRepository.ts
+  ├── 1. Cek Cache Lokal (cacheRepository.ts ➔ SQLite)
+  │      └── Jika cache masih segar (< 30 menit) ➔ Kembalikan data cache
+  │
+  └── 2. Request Jaringan (weatherService.ts + airQualityService.ts ➔ Open-Meteo API)
+         ├── Sukses ➔ Simpan / Perbarui ke SQLite (INSERT OR REPLACE) ➔ Tampilkan data segar
+         └── Gagal (Offline) ➔ Gunakan data lama dari SQLite (jika ada) atau tampilkan pesan first-run offline
+```
+
+### Penjelasan Status Data:
+- **`cache-segar`** *(Latar Hijau)*: Data diambil langsung dari cache SQLite lokal yang masih segar (umur < 30 menit) tanpa memanggil jaringan.
+- **`cache-basi`** *(Latar Oranye)*: Koneksi internet terputus, aplikasi menampilkan data tersimpan dari SQLite agar pengguna tidak melihat layar kosong, disertai label peringatan bahwa data mungkin sudah usang.
+- **`first-run offline`**: Terjadi jika aplikasi dibuka tanpa internet dan belum pernah ada data tersimpan untuk kota tersebut. Aplikasi memberikan petunjuk yang jelas serta tombol coba lagi.
+
+---
+
+## 📁 Struktur Direktori
+
+```text
+orientasi-jelajah-aman/
+├── metro.config.js                 # Konfigurasi Metro untuk aset WebAssembly (.wasm)
+├── package.json                    # Dependensi proyek
+├── README.md                       # Dokumentasi proyek
+└── src/
+    ├── app/                        # Rute aplikasi (Expo Router)
+    │   ├── _layout.tsx             # Root layout (ThemeProvider & StatusBar)
+    │   ├── index.tsx               # Redirect ke tabs
+    │   ├── tambah-favorit.tsx      # Modal tambah kota favorit
+    │   ├── detail/
+    │   │   └── [kota].tsx          # Halaman rincian cuaca kota
+    │   └── (tabs)/
+    │       ├── _layout.tsx         # Kustomisasi Ikon Tab Bar & Navigasi (Tugas 1)
+    │       ├── index.tsx           # Layar Beranda (Pencarian & Cuaca Terkini)
+    │       ├── riwayat.tsx         # Layar Riwayat (Pencarian & Cache Offline) (Tugas 2 & 3)
+    │       ├── pengaturan.tsx      # Layar Pengaturan Tema & Kelola Cache (Tugas 4)
+    │       └── tentang.tsx         # Layar Informasi & Fitur Aplikasi
+    ├── components/                 # Komponen UI modular
+    │   ├── AtribusiCuaca.tsx       # Atribusi Open-Meteo
+    │   ├── IndikatorAQI.tsx        # Indikator visual kualitas udara
+    │   ├── SearchBox.tsx           # Input pencarian kota
+    │   ├── StatusData.tsx          # Banner status data (Segar/Basi/Offline)
+    │   └── WeatherCard.tsx         # Kartu informasi suhu dan parameter cuaca
+    ├── constants/
+    │   ├── theme.ts                # Palet token warna Light & Dark
+    │   └── weatherCodes.ts         # Pemetaan WMO Weather Interpretation Codes
+    ├── context/
+    │   └── ThemeContext.tsx        # State management tema (Light/Dark/System)
+    ├── db/
+    │   └── database.ts             # Inisialisasi SQLite & migrasi tabel
+    ├── hooks/
+    │   ├── use-debounce.ts         # Hook debounce input teks
+    │   └── use-theme.ts            # Hook pembaca warna tema aktif
+    ├── services/
+    │   ├── airQualityService.ts    # Service API Kualitas Udara (Open-Meteo)
+    │   ├── cacheRepository.ts      # CRUD data cache di SQLite
+    │   ├── cuacaRepository.ts      # Logika Offline-First cuaca
+    │   ├── favoritStorage.ts       # Service kota favorit (AsyncStorage)
+    │   ├── geocodingService.ts     # Service pencarian kota/koordinat
+    │   ├── locationService.ts      # Service GPS/lokasi saat ini
+    │   ├── riwayatPencarianStorage.ts # Service riwayat pencarian (AsyncStorage)
+    │   └── weatherService.ts       # Service API Prakiraan Cuaca (Open-Meteo)
+    ├── types/                      # Definisi TypeScript interface & tipe data
+    └── utils/
+        └── alertHelper.ts          # Dialog konfirmasi aksi universal (Mobile & Web)
+```
+
+---
+
+## 🚀 Memulai & Menjalankan Aplikasi
+
+### 1. Prasyarat
+- **Node.js** (versi 18 ke atas disarankan)
+- **npm** atau **yarn**
+- Aplikasi **Expo Go** pada perangkat Android / iOS
+
+### 2. Instalasi Dependensi
+```bash
+npm install
+```
+
+### 3. Menjalankan Aplikasi
+
+#### A. Menjalankan di Browser Web:
+```bash
+npm run web
+```
+Aplikasi akan otomatis terbuka pada `http://localhost:8081`.
+
+#### B. Menjalankan di Mobile (Expo Go / Emulator):
+```bash
+npx expo start
+```
+- Pindai (*scan*) QR code menggunakan aplikasi **Expo Go** pada perangkat Android.
+- Tekan tombol `a` di terminal untuk membuka Android Emulator.
+- Tekan tombol `w` di terminal untuk membuka Web Browser.
+
+---
+
+## 🛠️ Teknologi yang Digunakan
+
+- **Framework**: [React Native](https://reactnative.dev/) dengan [Expo](https://expo.dev/) (SDK 57)
+- **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based routing)
+- **Database Lokal**: [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) (Offline caching)
+- **Key-Value Storage**: [@react-native-async-storage/async-storage](https://react-native-async-storage.github.io/async-storage/) (Tema, Riwayat, & Favorit)
+- **Icon Library**: [@expo/vector-icons](https://icons.expo.fyi/) (Ionicons)
+- **API Sumber Data**: [Open-Meteo API](https://open-meteo.com/) (Weather Forecast & Air Quality API, *Free & No API Key Required*)
+- **Bahasa**: TypeScript
+
+---
+
+## 👨‍💻 Pengembang
+
+- **Nama**: Azka Viero
+- **Mata Kuliah**: Pemrograman Berbasis Platform (4 SKS)
+- **Program Studi**: S1 Informatika
+- **Institusi**: UIN K.H. Abdurrahman Wahid Pekalongan
+
+---
+
+*Dibuat dengan ❤️ untuk Ujian Tengah Semester (UTS) Pemrograman Berbasis Platform 2026.*
+
 
 # Welcome to your Expo app 👋
 

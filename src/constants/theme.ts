@@ -9,21 +9,44 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#1A202C',
+    textSecondary: '#4A5568',
+    textMuted: '#718096',
+    background: '#F7FAFC',
+    cardBackground: '#FFFFFF',
+    backgroundElement: '#EDF2F7',
+    backgroundSelected: '#E2E8F0',
+    border: '#CBD5E0',
+    tint: '#2B6CB0',
+    tabIconDefault: '#718096',
+    tabIconSelected: '#2B6CB0',
+    danger: '#E53E3E',
+    dangerBackground: '#FFF5F5',
+    success: '#38A169',
+    successBackground: '#F0FFF4',
+    cardShadow: 'rgba(0, 0, 0, 0.06)',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#F7FAFC',
+    textSecondary: '#CBD5E0',
+    textMuted: '#A0AEC0',
+    background: '#121214',
+    cardBackground: '#1E2024',
+    backgroundElement: '#2A2D34',
+    backgroundSelected: '#363A42',
+    border: '#3B4048',
+    tint: '#63B3ED',
+    tabIconDefault: '#A0AEC0',
+    tabIconSelected: '#63B3ED',
+    danger: '#FC8181',
+    dangerBackground: '#3C1618',
+    success: '#68D391',
+    successBackground: '#173623',
+    cardShadow: 'rgba(0, 0, 0, 0.4)',
   },
 } as const;
 
+export type ThemeColors = (typeof Colors)[keyof typeof Colors];
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({

@@ -1,13 +1,14 @@
 // src/components/WeatherCard.tsx
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { TingkatAQI, WeatherCardProps } from "../types/cuaca";
 import { spacing, typeScale } from "../constants/styles";
+import { useAppTheme } from "../context/ThemeContext";
 
 const warnaPerTingkat: Record<TingkatAQI, string> = {
-  BAIK: "green",
-  SEDANG: "goldenrod",
-  TIDAK_SEHAT: "orange",
-  BERBAHAYA: "crimson",
+  BAIK: "#2E7D32",
+  SEDANG: "#D97706",
+  TIDAK_SEHAT: "#EA580C",
+  BERBAHAYA: "#DC2626",
 };
 
 export default function WeatherCard({
@@ -16,6 +17,8 @@ export default function WeatherCard({
   tingkatAQI,
   indeksAQI,
 }: WeatherCardProps) {
+  const { colors } = useAppTheme();
+
   const teksAQI =
     indeksAQI !== undefined
       ? `AQI: ${indeksAQI} (${tingkatAQI})`
@@ -29,21 +32,64 @@ export default function WeatherCard({
     <View
       accessible
       accessibilityLabel={labelAksesibilitas}
-      style={{
-        padding: spacing.sedang,
-        borderRadius: 8,
-        backgroundColor: "#F4F7FA",
-      }}
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.cardBackground,
+          borderColor: colors.border,
+        },
+      ]}
     >
-      <Text style={{ fontWeight: "bold", fontSize: typeScale.judul }}>
-        {kota}
-      </Text>
-      <Text style={{ fontSize: 32 }}>{suhu}°C</Text>
-      <Text
-        style={{ color: warnaPerTingkat[tingkatAQI], fontSize: typeScale.isi }}
-      >
-        {teksAQI}
-      </Text>
+      <Text style={[styles.namaKota, { color: colors.text }]}>{kota}</Text>
+      <Text style={[styles.suhu, { color: colors.text }]}>{suhu}°C</Text>
+      <View style={styles.aqiContainer}>
+        <View
+          style={[
+            styles.titikAQI,
+            { backgroundColor: warnaPerTingkat[tingkatAQI] || colors.tint },
+          ]}
+        />
+        <Text
+          style={[
+            styles.teksAQI,
+            { color: warnaPerTingkat[tingkatAQI] || colors.textSecondary },
+          ]}
+        >
+          {teksAQI}
+        </Text>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    padding: spacing.sedang,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 4,
+  },
+  namaKota: {
+    fontWeight: "bold",
+    fontSize: typeScale.judul,
+  },
+  suhu: {
+    fontSize: 36,
+    fontWeight: "800",
+  },
+  aqiContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 2,
+  },
+  titikAQI: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  teksAQI: {
+    fontSize: typeScale.isi,
+    fontWeight: "600",
+  },
+});

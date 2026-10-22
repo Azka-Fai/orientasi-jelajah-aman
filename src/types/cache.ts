@@ -28,4 +28,7 @@ export interface HasilCuacaOffline extends DataTersimpan {
 export interface RingkasanKotaTersimpan extends KotaUntukCache {
   kunci: string;
   disimpanPada: number;
+  suhu?: number;
+  kodeCuaca?: number;
 }
+
